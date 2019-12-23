@@ -4,15 +4,18 @@
   <remote_servers>
 {% for shard_name, replicas in clickhouse_shards.iteritems() %}
     <{{ shard_name }}>
+{%   for replica in replicas %}
       <shard>
         <internal_replication>true</internal_replication>
-{% for replica in replicas %}
+        <weight>{{ replica['weight'] | default(1) }}</weight>
+{%     for member in replica['members'] %}
         <replica>
-          <host>{{ replica['host'] }}</host>
-          <port>{{ replica['port'] | default(9000) }}</port>
+          <host>{{ member['host'] }}</host>
+          <port>{{ member['port'] | default(9000) }}</port>
         </replica>
-{% endfor %}
+{%     endfor %}
       </shard>
+{%   endfor %}
     </{{ shard_name }}>
 {% endfor %}
   </remote_servers>

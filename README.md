@@ -225,14 +225,19 @@ Including an example of how to use your role (for instance, with variables passe
               attributes:
                 - { name: testAttrName, type: String, null_value: "" }
       clickhouse_dbs_custom:
-         - { name: testu1 }
-         - { name: testu2, state:present }
-         - { name: testu3, state:absent }
+        - { name: testu1 }
+        - { name: testu2, state:present }
+        - { name: testu3, state:absent }
       clickhouse_shards:
         your_shard_name:
-          - { host: "db_host_1", port: 9000 }
-          - { host: "db_host_2", port: 9000 }
-          - { host: "db_host_3", port: 9000 }
+          - weight: 0
+            members:
+              - host: "db_host_1"
+              - host: "db_host_2"
+          - weight: 1
+            members:
+              - host: "db_host_3"
+              - host: "db_host_4"
       clickhouse_zookeeper_nodes:
         - { host: "zoo_host_1", port: 2181 }
         - { host: "zoo_host_2", port: 2181 }
