@@ -17,6 +17,7 @@ clickhouse_profiles_default:
    max_memory_usage: 10000000000
    use_uncompressed_cache: 0
    load_balancing: random
+   max_partitions_per_insert_block: 100
  readonly:
    readonly: 1
 
@@ -48,7 +49,7 @@ clickhouse_users_default:
   - { name: "readonly", password: "", networks: "{{ clickhouse_networks_default }}", profile: "default", quota: "default", comment: "Example of user with readonly access" }
 
 clickhouse_ready_retries: 3
-clickhouse_ready_delay: 15
+clickhouse_ready_delay: 5
 
 #Full form { name:'<username>', password: '<plainpassword>', password_sha256_hex: '<sha256password>',
 #   networks:"<{} with nets>", profile:'<profile>', quota:'<quota>', dbs: '{} with dbs', comment: '<some comment>'}
