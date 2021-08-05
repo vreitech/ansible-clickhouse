@@ -109,37 +109,60 @@ clickhouse_dbs_custom:
 
 ```
 
-F: You can create dictionary via odbc
-```
+F: You can create dictionary via `odbc`:
+```yaml
 clickhouse_dicts:
-          test1:
-            name: test_dict
-            odbc_source:
-              connection_string: "DSN=testdb"
-              source_table: "dict_source"
-            lifetime:
-              min: 300
-              max: 360
-            layout: hashed
-            structure:
-              key: "testIntKey"
-              attributes:
-                - { name: testAttrName, type: UInt32, null_value: 0 }
-          test2:
-            name: test_dict
-            odbc_source:
-              connection_string: "DSN=testdb"
-              source_table: "dict_source"
-            lifetime:
-              min: 300
-              max: 360
-            layout: complex_key_hashed
-            structure:
-              key:
-                attributes:
-                  - { name: testAttrComplexName, type: String }
-              attributes:
-                - { name: testAttrName, type: String, null_value: "" }
+  test1:
+    name: test_dict
+    odbc_source:
+      connection_string: "DSN=testdb"
+      source_table: "dict_source"
+    lifetime:
+      min: 300
+      max: 360
+    layout: hashed
+    structure:
+      key: "testIntKey"
+      attributes:
+        - { name: testAttrName, type: UInt32, null_value: 0 }
+  test2:
+    name: test_dict
+    odbc_source:
+      connection_string: "DSN=testdb"
+      source_table: "dict_source"
+    lifetime:
+      min: 300
+      max: 360
+    layout: complex_key_hashed
+    structure:
+      key:
+        attributes:
+          - { name: testAttrComplexName, type: String }
+      attributes:
+        - { name: testAttrName, type: String, null_value: "" }
+```
+
+Or `file`:
+```yaml
+clickhouse_dicts:
+  geoip_asn_blocks_ipv4:
+    name: geoip_asn_blocks_ipv4
+    source:
+      type: file
+      file:
+        path: "{{ clickhouse_path_configdir }}/GeoLite2-ASN-Blocks-IPv4.csv"
+        format: "CSVWithNames"
+    lifetime:
+      min: "300"
+      max: "600"
+    layout: ip_trie
+    structure:
+      key:
+        attributes:
+          - { name: "prefix", type: "String" }
+      attributes:
+        - { name: "autonomous_system_number", type: "UInt32", null_value: "0" }
+        - { name: "autonomous_system_organization", type: "String", null_value: "?" }
 ```
 
 F: Flag for remove clickhouse from host(disabled by default)
