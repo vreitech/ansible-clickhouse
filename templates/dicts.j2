@@ -17,6 +17,9 @@
         <format>CSVWithNames</format>
       </file>
 {% endif %}
+    <settings>
+      <format_csv_allow_single_quotes>0</format_csv_allow_single_quotes>
+    </settings>
     </source>
     <lifetime>
       <min>{{ clickhouse_dicts[dict].lifetime.min|default(300)}}</min>
