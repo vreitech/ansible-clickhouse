@@ -1,6 +1,16 @@
+---
+- name: Config | Create dictionaries directory
+  file:
+    path: "{{ clickhouse_path_configdir }}/dicts.d"
+    owner: clickhouse
+    group: clickhouse
+    state: directory
+  become: true
+  when: clickhouse_dicts is defined and ( clickhouse_dicts|length>0 )
+
 - name: Config | Generate dictionary config
   template:
    src: dicts.j2
-   dest: "{{ clickhouse_path_configdir }}/auto_dictionary.xml"
+   dest: "{{ clickhouse_path_configdir }}/dicts.d/auto_dictionary.xml"
   become: true
   when: clickhouse_dicts is defined and ( clickhouse_dicts|length>0 )
