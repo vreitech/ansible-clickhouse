@@ -1,16 +1,18 @@
 ---
 # defaults file for clickhouse
 
-clickhouse_version: "*"
+clickhouse_version: 'latest'
+clickhouse_service_ensure: 'started'
+clickhouse_service_enable: true
 
 #Flag for using with requirements check
-clickhouse_supported: no
+clickhouse_supported: false
 #Type of installation (package,source)
-clickhouse_setup: package
+clickhouse_setup: 'package'
 #Flag for remove clickhouse from host(disabled by default)
-clickhouse_remove: no
+clickhouse_remove: false
 #Flag for full remove(incl db and config), use clickhouse_remove + clickhouse_remove_full
-clickhouse_remove_full: no
+clickhouse_remove_full: false
 
 clickhouse_profiles_default:
  default:
@@ -32,13 +34,40 @@ clickhouse_listen_host_custom: []
 clickhouse_listen_host: "{{ clickhouse_listen_host_default + clickhouse_listen_host_custom }}"
 
 clickhouse_http_port: 8123
-
 clickhouse_tcp_port: 9000
 
-clickhouse_https_port: 8443
-clickhouse_tcp_secure_port: 9440
+# clickhouse_https_port: 8443
+# clickhouse_tcp_secure_port: 9440
+
+clickhouse_ssl_server:
+  certificate_file: "/etc/clickhouse-server/server.crt"
+  private_key_file: "/etc/clickhouse-server/server.key"
+  dh_params_file: "/etc/clickhouse-server/dhparam.pem"
+  verification_mode: "none"
+  load_default_ca_file: "true"
+  cache_sessions: "true"
+  disable_protocols: "sslv2,sslv3"
+  prefer_server_ciphers: "true"
+
+clickhouse_ssl_client:
+  load_default_ca_file: "true"
+  cache_sessions: "true"
+  disable_protocols: "sslv2,sslv3"
+  prefer_server_ciphers: "true"
+  invalid_certificate_handler_name: "RejectCertificateHandler"
 
 clickhouse_interserver_http: 9009
+# clickhouse_interserver_https: 9010
+
+# clickhouse_interserver_http_credentials:
+#   user: "internal"
+#   password: "secretstring"
+
+# clickhouse_distributed_secret: "secretstring"
+
+# clickhouse_zookeeper_identity:
+#   user: "zoo-user"
+#   password: "secretstring"
 
 clickhouse_networks_default:
   - "::1"
@@ -57,10 +86,10 @@ clickhouse_ready_delay: 5
 clickhouse_users_custom: {}
 
 clickhouse_quotas_intervals_default:
- - { duration: 3600, queries: 0, errors: 0,result_rows: 0,read_rows: 0,execution_time: 0 }
+  - { duration: 3600, queries: 0, errors: 0, result_rows: 0, read_rows: 0, execution_time: 0 }
 
 clickhouse_quotas_default:
- - { name: "default", intervals: "{{ clickhouse_quotas_intervals_default }}",comment: "Default quota - count only" }
+ - { name: "default", intervals: "{{ clickhouse_quotas_intervals_default }}", comment: "Default quota - count only" }
 
 clickhouse_quotas_custom: {}
 

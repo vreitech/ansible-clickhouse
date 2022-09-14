@@ -1,5 +1,9 @@
-ansible-clickhouse [![Build Status](https://travis-ci.org/AlexeySetevoi/ansible-clickhouse.svg?branch=master)](https://travis-ci.org/AlexeySetevoi/ansible-clickhouse)
+ansible-clickhouse 
 =========
+![Build Status](https://github.com/alexeysetevoi/ansible-clickhouse/actions/workflows/ci.yml/badge.svg?branch=master)
+[![Build Status](https://travis-ci.org/AlexeySetevoi/ansible-clickhouse.svg?branch=master)](https://travis-ci.org/github/AlexeySetevoi/ansible-clickhouse)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/alexeysetevoi/ansible-clickhouse)](https://galaxy.ansible.com/alexeysetevoi/clickhouse)
+[![Ansible Galaxy](https://img.shields.io/badge/role-alexeysetevoi.clickhouse-blue.svg)](https://galaxy.ansible.com/alexeysetevoi/clickhouse/)
 
 Simple clickhouse-server deploy and management role.
 Any issues and pr are welcome.
@@ -17,11 +21,27 @@ clickhouse_http_port: 8123
 clickhouse_tcp_port: 9000
 clickhouse_interserver_http: 9009
 ```
-F: you can manage listen ip:
+F: You can add listen ips on top of defaults:
 ```yaml
 clickhouse_listen_host_custom:
   - "192.168.0.1"
 ```
+
+F: you can manage ttl query_log:
+```yaml
+clickhouse_query_log_ttl: 'event_date + INTERVAL 7 DAY DELETE'
+```
+F: you can manage ttl query_thread_log:
+```yaml
+clickhouse_query_thread_log_ttl: 'event_date + INTERVAL 7 DAY DELETE'
+```
+
+F: Or you can specify ips directly e.g. to listen on all ipv4 and ipv6 addresses:
+```yaml
+clickhouse_listen_host:
+  - "::"
+```
+
 F: You can create custom profiles
 ```yaml
 clickhouse_profiles_custom:
@@ -81,6 +101,13 @@ clickhouse_users_custom:
           quota: "default",
           dbs: [ testu1,testu2,testu3 ] ,
           comment: "classic user with multi dbs and multi-custom network allow password"}
+      - { name: "testuser4",
+          ldap_server: "example_ldap_server",
+          networks: { 192.168.0.0/24, 10.0.0.0/8 },
+          profile: "default",
+          quota: "default",
+          dbs: [ testu1,testu2,testu3 ] ,
+          comment: "external authentication using ldap_server definition"}
 ```
 
 F: You can manage own quotas:
@@ -170,7 +197,7 @@ F: Flag for remove clickhouse from host(disabled by default)
 clickhouse_remove: no
 ```
 
-F: You can manage [Kafka configuration](https://clickhouse.yandex/docs/en/operations/table_engines/kafka/#configuration)
+F: You can manage [Kafka configuration](https://clickhouse.com/docs/en/engines/table-engines/integrations/kafka/#configuration)
 ```yaml
 # global configuration
 clickhouse_kafka_config:
@@ -186,7 +213,35 @@ clickhouse_kafka_topics_config:
     fetch_min_bytes: 120000
 ```
 
-F: You can manage Merge Tree config. For the list of available parameters, see [MergeTreeSettings.h](https://github.com/yandex/ClickHouse/blob/master/dbms/src/Storages/MergeTree/MergeTreeSettings.h).
+F: You can manage [LDAP Server configuration](https://clickhouse.com/docs/en/operations/external-authenticators/ldap/#ldap-server-definition)
+```yaml
+clickhouse_ldap_servers:
+  # Debug with ldapwhoami -H '<host>' -D '<bind_dn>' -w <password>
+  example_ldap_server:
+    host: "ldaps.example.com"
+    port: "636"
+    bind_dn: "EXAMPLENET\\{user_name}"
+    verification_cooldown: "300"
+    enable_tls: "yes"
+    tls_require_cert: "demand"
+```
+
+F: You can manage [LDAP External User Directory](https://clickhouse.com/docs/en/operations/external-authenticators/ldap/#ldap-external-user-directory)
+```yaml
+# Helpful guide on https://altinity.com/blog/integrating-clickhouse-with-ldap-part-two
+clickhouse_ldap_user_directories:
+  - server: "example_ldap_server"
+    roles:
+      - "ldap_user"
+    role_mapping:
+      base_dn: "ou=groups,dc=example,dc=com"
+      attribute: "CN"
+      scope: "subtree"
+      search_filter: "(&amp;(objectClass=group)(member={user_dn}))"
+      prefix: "clickhouse_
+```
+
+F: You can manage Merge Tree config. For the list of available parameters, see [MergeTree tables settings](https://clickhouse.com/docs/en/operations/settings/merge-tree-settings/).
 ```yaml
 clickhouse_merge_tree_config:
   max_suspicious_broken_parts: 5
@@ -223,6 +278,8 @@ Including an example of how to use your role (for instance, with variables passe
               quota: "default",
               dbs: [ testu1,testu2,testu3 ] ,
               comment: "classic user with multi dbs and multi-custom network allow password"}
+      clickhouse_query_log_ttl: 'event_date + INTERVAL 7  DELETE'
+      clickhouse_query_thread_log_ttl: 'event_date + INTERVAL 7  DELETE'
       clickhouse_dicts:
           test1:
             name: test_dict
@@ -253,19 +310,17 @@ Including an example of how to use your role (for instance, with variables passe
               attributes:
                 - { name: testAttrName, type: String, null_value: "" }
       clickhouse_dbs_custom:
-        - { name: testu1 }
-        - { name: testu2, state:present }
-        - { name: testu3, state:absent }
-      clickhouse_shards:
-        your_shard_name:
-          - weight: 0
-            members:
-              - host: "db_host_1"
-              - host: "db_host_2"
-          - weight: 1
-            members:
-              - host: "db_host_3"
-              - host: "db_host_4"
+         - { name: testu1 }
+         - { name: testu2, state:present }
+         - { name: testu3, state:absent }
+      clickhouse_clusters:
+        your_cluster_name:
+          shard_1:
+              - { host: "db_host_1", port: 9000 }
+              - { host: "db_host_2", port: 9000 }
+          shard_2:
+              - { host: "db_host_3", port: 9000 }
+              - { host: "db_host_4", port: 9000 }       
       clickhouse_zookeeper_nodes:
         - { host: "zoo_host_1", port: 2181 }
         - { host: "zoo_host_2", port: 2181 }
@@ -273,12 +328,78 @@ Including an example of how to use your role (for instance, with variables passe
     roles:
       - ansible-clickhouse
 ```
+
 To generate macros: in file host_vars\db_host_1.yml
 ```yaml
 clickhouse_macros:
   layer: 01
   shard: "your_shard_name"
   replica: "db_host_1"
+```
+
+Security harden the cluster. You can configure the cluster with extra settings
+which enables
+- HTTPS port
+- TLS Encrypted TCP port
+- HTTPS for data replication
+- Credentials for data replication
+- Secret validation for distributed queries
+- ZooKeeper ACL
+```yaml
+- hosts: clickhouse_cluster
+  become: true
+  roles:
+    - ansible-clickhouse
+  vars:
+    # HTTPS instead of normal HTTP
+    clickhouse_https_port: 8443
+    # TLS encryption for the native TCP protocol (needs `clickhouse-client --secure`)
+    clickhouse_tcp_secure_port: 9440
+    # TLS encryption between nodes in cluster
+    clickhouse_interserver_https: 9010
+    # Credentials used to authenticate nodes during data replication
+    clickhouse_interserver_http_credentials:
+      user: "internal"
+      password: "supersecretstring"
+    # Secret used to validate nodes in cluster for distributed queries
+    clickhouse_distributed_secret: "supersecretstring2"
+    # Password protect zookeeper paths used by ClickHouse
+    clickhouse_zookeeper_identity:
+      user: "zoo_user"
+      password: "secretzoostring"
+    # OpenSSL settings
+    clickhouse_ssl_server:
+      certificate_file: "/etc/clickhouse-server/server.crt"
+      private_key_file: "/etc/clickhouse-server/server.key"
+      dh_params_file: "/etc/clickhouse-server/dhparam.pem"
+      verification_mode: "none"
+      load_default_ca_file: "true"
+      cache_sessions: "true"
+      disable_protocols: "sslv2,sslv3"
+      prefer_server_ciphers: "true"
+    clickhouse_clusters:
+      your_cluster_name:
+        shard_1:
+          - host: "db_host_1"
+            port: 9440
+            secure: true
+          - host: "db_host_2"
+            port: 9440
+            secure: true
+        shard_2:
+          - host: "db_host_3"
+            port: 9440
+            secure: true
+          - host: "db_host_4"
+            port: 9440
+            secure: true
+    clickhouse_zookeeper_nodes:
+      - host: "zoo_host_1"
+        port: 2181
+      - host: "zoo_host_2"
+        port: 2181
+      - host: "zoo_host_3"
+        port: 2181
 ```
 
 F: You can call separately stages(from playbook, external role etc.):
@@ -299,7 +420,7 @@ BSD
 Author Information
 ------------------
 
-[ClickHouse](https://clickhouse.yandex/docs/en/index.html) by [Yandex LLC](https://yandex.ru/company/).
+[ClickHouse](https://clickhouse.com/docs/en/index.html) by [ClickHouse, Inc.](https://clickhouse.com/company/).
 
 Role by [AlexeySetevoi](https://github.com/AlexeySetevoi).
 
