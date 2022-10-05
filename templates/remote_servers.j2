@@ -1,22 +1,27 @@
 <?xml version="1.0"?>
-<!-- {{ ansible_managed }} -->
-<yandex>
+{{ ansible_managed | comment('xml') }}
+<clickhouse>
   <remote_servers>
-{% for shard_name, replicas in clickhouse_shards.items() | list %}
-    <{{ shard_name }}>
-{%   for replica in replicas %}
-      <shard>
-        <internal_replication>true</internal_replication>
-        <weight>{{ replica['weight'] | default(1) }}</weight>
-{%     for member in replica['members'] %}
-        <replica>
-          <host>{{ member['host'] }}</host>
-          <port>{{ member['port'] | default(9000) }}</port>
-        </replica>
-{%     endfor %}
+{% for clusters_name, shards_name in clickhouse_clusters.items() | list %}
+    <{{ clusters_name }}>
+{% if clickhouse_distributed_secret is defined %}
+        <secret>{{ clickhouse_distributed_secret }}</secret>
+{% endif %}
+{% for shard_name, replicas  in shards_name.items() %}
+        <shard>
+          <internal_replication>true</internal_replication>
+{% for replica in replicas %}
+          <replica>
+            <host>{{ replica['host'] }}</host>
+            <port>{{ replica['port'] | default(9000) }}</port>
+{% if 'secure' in replica %}
+            <secure>1</secure>
+{% endif %}
+          </replica>
+{% endfor %}
       </shard>
-{%   endfor %}
-    </{{ shard_name }}>
+{% endfor %}      
+    </{{ clusters_name }}>
 {% endfor %}
   </remote_servers>
-</yandex>
+</clickhouse>
