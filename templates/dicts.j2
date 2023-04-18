@@ -14,13 +14,16 @@
 {% if clickhouse_dicts[dict].source.type == 'file' %}
       <file>
         <path>{{ clickhouse_dicts[dict].source.file.path }}</path>
-        <format>CSVWithNames</format>
+        <format>{{ clickhouse_dicts[dict].source.file.format  }}</format>
       </file>
 {% endif %}
+{% if clickhouse_dicts[dict].settings is defined %}
       <settings>
-        <format_csv_allow_single_quotes>0</format_csv_allow_single_quotes>
-        <input_format_skip_unknown_fields>1</input_format_skip_unknown_fields>
+{% for key, value in clickhouse_dicts[dict].settings.items() %}
+        <{{ key }}>{{ value }}</{{ key }}>
+{% endfor %}
       </settings>
+{% endif %}
     </source>
     <lifetime>
       <min>{{ clickhouse_dicts[dict].lifetime.min|default(300)}}</min>
