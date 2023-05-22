@@ -529,4 +529,11 @@
   </s3>
 {% endif %}
 
+{% if clickhouse_query_cache is defined %}
+  <query_cache>
+  {% for key, value in clickhouse_query_cache.items() %}
+    <{{ key }}>{{ value }}</{{ key }}>
+  {% endfor %}
+  </query_cache>
+{% endif %}
 </clickhouse>
