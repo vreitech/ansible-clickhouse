@@ -248,6 +248,15 @@ clickhouse_merge_tree_config:
   parts_to_throw_insert: 600
 ```
 
+F: You can manage [Query Cache](https://clickhouse.com/docs/en/operations/query-cache)
+```yaml
+clickhouse_query_cache:
+  max_size_in_bytes: 1073741824
+  max_entries: 1024
+  max_entry_size_in_bytes: 1048576
+  max_entry_size_in_rows: 30000000
+```
+
 Example Playbook
 ----------------
 
