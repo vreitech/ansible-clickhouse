@@ -19,6 +19,10 @@
     <tcp_port_secure>{{ clickhouse_tcp_secure_port }}</tcp_port_secure>
 {% endif %}
 
+{% if clickhouse_tcp_with_proxy_port is defined %}
+    <tcp_with_proxy_port>9011</tcp_with_proxy_port>
+{% endif %}
+
 {% if clickhouse_http_port is defined %}
     <http_port>{{ clickhouse_http_port }}</http_port>
 {% endif %}
