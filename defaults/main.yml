@@ -38,6 +38,7 @@ clickhouse_tcp_port: 9000
 
 # clickhouse_https_port: 8443
 # clickhouse_tcp_secure_port: 9440
+# clickhouse_tcp_with_proxy_port: 9011
 
 clickhouse_ssl_server:
   certificate_file: "/etc/clickhouse-server/server.crt"
@@ -133,5 +134,3 @@ clickhouse_kafka_config: []
 clickhouse_kafka_topics_config: []
 
 clickhouse_merge_tree_config: []
-
-clickhouse_query_cache: []
