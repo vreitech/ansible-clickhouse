@@ -257,6 +257,26 @@ clickhouse_query_cache:
   max_entry_size_in_rows: 30000000
 ```
 
+F: You can integrate [S3](https://clickhouse.com/docs/en/integrations/s3#s3-backed-mergetree)
+```yaml
+clickhouse_storage:
+  disks:
+    s3_disk:
+      type: s3
+      endpoint: 'https://YOUR_S3_URL/'
+      access_key_id: 'YOUR_ACCESS_KEY'
+      secret_access_key: 'YOUR_SECRET_KEY'
+      cache_path: '/var/lib/clickhouse/disks/s3_disk/cache/'
+      metadata_path: '/var/lib/clickhouse/disks/s3_disk/'
+      cache_enabled: 'true'
+      data_cache_enabled: 'true'
+  policies:
+    s3_policy:
+      volumes:
+        main:
+          disk: 's3_disk'
+```
+
 Example Playbook
 ----------------
 

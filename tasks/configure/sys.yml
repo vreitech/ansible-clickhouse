@@ -84,6 +84,17 @@
   become: true
   when: clickhouse_zookeeper_nodes is defined
 
+- name: Config | Generate storage config
+  template:
+    src: storage.j2
+    dest: "{{ clickhouse_path_configdir }}/config.d/storage.xml"
+    owner: "{{ clickhouse_user | default('clickhouse') }}"
+    group: "{{ clickhouse_group | default('clickhouse') }}"
+    mode: "u=rw,og=r"
+  # notify: restart-ch
+  become: true
+  when: clickhouse_storage is defined
+
 - name: Config | Fix interserver_http_port and intersever_https_port collision
   lineinfile:
     path: "{{ clickhouse_path_configdir }}/config.xml"
